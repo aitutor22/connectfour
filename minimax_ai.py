@@ -34,10 +34,7 @@ def total_consecutive_threes_helper(li, player_mark):
 			total_threes += 1
 	return total_threes
 
-choice = None
 def minimax(board, ongoing=True, reward=0, player_one_turn=True, depth=0):
-	global choice
-
 	player_mark = 1 if player_one_turn else -1
 
 	if not ongoing:
@@ -61,12 +58,11 @@ def minimax(board, ongoing=True, reward=0, player_one_turn=True, depth=0):
 
 	if player_one_turn:
 		if depth == 1:
-			# print(moves)
-			# print(np.argmax(scores))
-			choice = moves[np.argmax(scores)]
+			return moves[np.argmax(scores)]
 		return max(scores)
 	else:
-		# if depth == 1:	
+		if depth == 1:
+			return moves[np.argmin(scores)]		
 		return min(scores)
 	# print(depth, scores)
 
@@ -74,8 +70,8 @@ b, ongoing, reward = init_game()
 player_one_turn = True
 while ongoing:
 	if player_one_turn:
-		minimax(b, ongoing, reward, player_one_turn)
-		b, ongoing, reward = make_move(b, choice, player_one_turn)
+		move = minimax(b, ongoing, reward, player_one_turn)
+		b, ongoing, reward = make_move(b, move, player_one_turn)
 	else:
 		user_move = int(input('plese make a move\n'))
 		b, ongoing, reward = make_move(b, user_move, player_one_turn)
