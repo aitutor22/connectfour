@@ -1,5 +1,7 @@
 import numpy as np
 
+#neural network will always thinks it's 1; and it's opponent will always be -1
+#can simply multiply the board by -1 to reverse
 def get_available_boards(board, player):
     cols = board.shape[1]
     results = []
@@ -40,28 +42,6 @@ def add_piece_helper(board, player, row, col):
 def check_victory(board, player, row, col):
     return any([check_victory_helper(board, player, row, col, 0, 1), check_victory_helper(board, player, row, col, 1, 0), check_victory_helper(board, player, row, col, 1, 1), check_victory_helper(board, player, row, col, -1, 1)])
 
-def total_consecutive_threes(board, player):
-    total_threes = 0
-    total_threes += sum([total_consecutive_threes_helper(row, player) for row in board])
-    return total_threes
-
-#return number of 3 consecutive items in a list
-def total_consecutive_threes_helper(li, player):
-    total_threes = 0
-
-    #counter used to track number of consecutive pieces
-    counter = 0
-    for val in li:
-        if val == player:
-            counter += 1
-        else:
-            counter = 0
-
-        if counter >= 3:
-            total_threes += 1
-
-    return total_threes
-
 #use a higher level function that can be used to check horizontal, vertical and diagonal
 def check_victory_helper(board, player, row, col, row_offset, col_offset):
     counter = 1
@@ -89,22 +69,46 @@ def play(player_one_ai=None, player_two_ai=None, rows=6, cols=7, player_one_star
     board = np.zeros((rows, cols))    
 
     while True:
-        player = 1 if player_one else 2
+        #this is for display purposes (First Player  vs Second Player)
+        player_display = 'first' if player_one else 'second'
+        player_mark = 1 if player_one else -1 
 
         if (player_one and player_one_ai == None) or (not player_one and player_two_ai == None):
-            col = int(input('Please insert move Player {}\n'.format(player)))
+            col = int(input('Please insert move {} player \n'.format(player_display)))
         elif not player_one:
-            move = player_two_ai(board, get_available_boards)
+            move = player_two_ai(board)
 
-        r, c = add_piece(board, player, col)
-        print(total_consecutive_threes(board, player))
-        if check_victory(board, player, r, c):
+        r, c = add_piece(board, player_mark, col)
+        if check_victory(board, player_mark, r, c):
             print(board)
-            print('You have won Player {}'.format(player))
+            print('You have won {} player\n'.format(player_display))
             break
 
         print(board)
         player_one = not player_one
+
+# def total_consecutive_threes(board, player):
+#     total_threes = 0
+#     total_threes += sum([total_consecutive_threes_helper(row, player) for row in board])
+#     return total_threes
+
+# #return number of 3 consecutive items in a list
+# def total_consecutive_threes_helper(li, player):
+#     total_threes = 0
+
+#     #counter used to track number of consecutive pieces
+#     counter = 0
+#     for val in li:
+#         if val == player:
+#             counter += 1
+#         else:
+#             counter = 0
+
+#         if counter >= 3:
+#             total_threes += 1
+
+#     return total_threes
+
 
 if __name__ == '__main__':
     play()
