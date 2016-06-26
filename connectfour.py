@@ -138,11 +138,11 @@ def make_move(board, col, player_one_turn=True):
 
 if __name__ == '__main__':
     board, _, _ = init_game()
-    board, _, _ = make_move(board, 0, True)
-    board, _, _ = make_move(board, 1, False)
-    board, _, _ = make_move(board, 0, True)
-    board, _, _ = make_move(board, 1, False)
-    board, _, _ = make_move(board, 0, True)
-    board, _, _ = make_move(board, 1, False)
-    state = make_move(board, 0,True)    
+    board, _, _ = make_move(board, 0, False)
+    # board, _, _ = make_move(board, 1, False)
+    board, _, _ = make_move(board, 0, False)
+    # board, _, _ = make_move(board, 1, False)
+    board, _, _ = make_move(board, 0, False)
+    # board, _, _ = make_move(board, 1, False)
+    state = make_move(board, 0,False)    
     print(state)

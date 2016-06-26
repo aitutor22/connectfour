@@ -1,8 +1,15 @@
+import time
+
 from connectfour import *
 
 max_depth = 5
 
 #evaluation function
+#+ if it favours player 1, - if it favours player 2
+def evaluate(board):
+	#weight by 0.1
+	return (total_consecutive_threes(board, True) - total_consecutive_threes(board, False)) * 0.1
+
 def total_consecutive_threes(board, player_one_turn=True):
 	player_mark = 1 if player_one_turn else -1 
 	total_threes = 0
@@ -34,17 +41,17 @@ def total_consecutive_threes_helper(li, player_mark):
 			total_threes += 1
 	return total_threes
 
-def minimax(board, ongoing=True, reward=0, player_one_turn=True, depth=0):
+def minimax(board, player_one_turn=True):
+	return minimax_helper(board, True, 0, player_one_turn)
+
+def minimax_helper(board, ongoing=True, reward=0, player_one_turn=True, depth=0):
 	player_mark = 1 if player_one_turn else -1
 
+	#will return the absolute value
 	if not ongoing:
-		# print('reward: {}'.format(reward))
-		return reward * player_mark
+		return reward
 	elif depth == max_depth:
-		#need to scale properly
-		# s = total_consecutive_threes(board, player_one_turn) * 0.1
-		# if s == 3:
-		return total_consecutive_threes(board, player_one_turn) * 0.1 * player_mark
+		return evaluate(board)
 
 	depth += 1
 	scores = []
@@ -54,89 +61,31 @@ def minimax(board, ongoing=True, reward=0, player_one_turn=True, depth=0):
 	for move in moves:
 		possible_board = init_game(board)[0]
 		possible_board, ongoing, reward = make_move(possible_board, move, player_one_turn)
-		scores.append(minimax(possible_board, ongoing, reward, next_turn, depth))
+		scores.append(minimax_helper(possible_board, ongoing, reward, next_turn, depth))
 
 	if player_one_turn:
-		if depth == 1:
+		if depth == 1:	
 			return moves[np.argmax(scores)]
 		return max(scores)
 	else:
 		if depth == 1:
 			return moves[np.argmin(scores)]		
 		return min(scores)
-	# print(depth, scores)
-
-b, ongoing, reward = init_game()
-player_one_turn = True
-while ongoing:
-	if player_one_turn:
-		move = minimax(b, ongoing, reward, player_one_turn)
-		b, ongoing, reward = make_move(b, move, player_one_turn)
-	else:
-		user_move = int(input('plese make a move\n'))
-		b, ongoing, reward = make_move(b, user_move, player_one_turn)
-
-	print(b)
-	print('\n*******NEXT PLAYER*******\n')
-	player_one_turn = not player_one_turn
-
-
-
-# print(minimax(b, True, 0))
-# print('choice: {}'.format(choice))
-
-# class Node(object):
-# 	def __init__(self, board, player_one_turn, value=None, depth=0):
-# 		self.board = board
-# 		self.children = []
-# 		self.player_one_turn = player_one_turn
-# 		self.value = value
-# 		self.depth = depth
-
-# 	def create_children(self):
-# 		child_turn = not self.player_one_turn
-# 		child_depth = self.depth + 1
-
-# 		#list of potential moves (in terms of col index)
-# 		available_cols = get_available_cols(self.board)
-# 		for col in available_cols:
-# 			#creates a copy of the parent board, and then add each move to it 
-# 			#and save it as child's board
-# 			child_board, _, _ = init_game(self.board)
-			
-# 			#add move
-# 			child_board, ongoing, reward = make_move(child_board, col, child_turn)
-# 			# print(child_board)
-			
-# 			#if game has ended, assign reward function as value
-# 			if not ongoing:
-# 				child_value = reward
-# 			#if we have reached max depth, then use heuristic evaluation function to get value
-# 			elif child_depth == max_depth: 
-# 				child_value = total_consecutive_threes(child_board, child_turn)
-# 			else:
-# 				child_value = None
-
-# 			child = Node(child_board, child_turn, child_value, child_depth)
-# 			self.children.append(child)
-
-# 	def __str__(self):
-# 		return '{}\nvalue: {}'.format(self.board, self.value)
 
 if __name__ == '__main__':
-	pass
-	# board, _, _ = init_game()
+	board, _, _ = init_game()
 
-	# n = Node(board, True)
-	# n.create_children()
-	# for c in n.children:
-	# 	print(c)
+	board, _, _ = make_move(board, 0, False)
+	# board, _, _ = make_move(board, 1, False)
+	board, _, _ = make_move(board, 0, False)
+	# # board, _, _ = make_move(board, 1, False)
+	# board, ongoing, reward = make_move(board, 0, False)
+	# board, ongoing, reward = make_move(board, 0, False)
+	# board, ongoing, reward = make_move(board, 0, False)
 
-	# board, _, _ = make_move(board, 0, True)
-	# board, _, _ = make_move(board, 1, False)
-	# board, _, _ = make_move(board, 0, True)
-	# board, _, _ = make_move(board, 1, False)
-	# board, _, _ = make_move(board, 0, True)
+	start_time = time.time()
+	minimax(board, False)
+	print(time.time() - start_time)
 
 	# board, _, _ = make_move(board, 3, True)
 	# board, _, _ = make_move(board, 4, True)
@@ -149,3 +98,17 @@ if __name__ == '__main__':
 	# board, _, _ = make_move(board, 1, False)
 	# state = make_move(board, 0,True)    
 	# print(state)
+
+	# b, ongoing, reward = init_game()
+	# player_one_turn = True
+	# while ongoing:
+	# 	if player_one_turn:
+	# 		move = minimax(b, player_one_turn)
+	# 		b, ongoing, reward = make_move(b, move, player_one_turn)
+	# 	else:
+	# 		user_move = int(input('plese make a move\n'))
+	# 		b, ongoing, reward = make_move(b, user_move, player_one_turn)
+
+	# 	print(b)
+	# 	print('\n*******NEXT PLAYER*******\n')
+	# 	player_one_turn = not player_one_turn
