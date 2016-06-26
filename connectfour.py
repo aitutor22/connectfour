@@ -12,18 +12,18 @@ rewards = {
 
 #neural network will always thinks it's 1; and it's opponent will always be -1
 #can simply multiply the board by -1 to reverse
-def get_available_boards(board, player):
-    cols = board.shape[1]
-    results = []
+# def get_available_boards(board, player):
+#     cols = board.shape[1]
+#     results = []
 
-    for c in range(cols):
-        #if we can add a piece to the col, create a copy of the board and add a piece to that board
-        if available_row(board, c) != -1:
-            b = np.copy(board)
-            add_piece(b, player, c)
-            results.append((b, c))
+#     for c in range(cols):
+#         #if we can add a piece to the col, create a copy of the board and add a piece to that board
+#         if available_row(board, c) != -1:
+#             b = np.copy(board)
+#             add_piece(b, player, c)
+#             results.append((b, c))
 
-    return results
+#     return results
 
 #modifies board inplace
 #adds a piece and return the (row, col) of the piece added
@@ -39,7 +39,7 @@ def add_piece(board, player, col):
         return None
 
 #returns a list of available cols
-def get_available_cols(board):
+def get_available_moves(board):
     return np.where(board[0] == 0)[0]
 
 #return the first row where a piece can be placed
