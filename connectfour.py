@@ -38,6 +38,10 @@ def add_piece(board, player, col):
     else:
         return None
 
+#returns a list of available cols
+def get_available_cols(board):
+    return np.where(board[0] == 0)[0]
+
 #return the first row where a piece can be placed
 # if invalid, return -1
 def available_row(board, col):
@@ -80,9 +84,12 @@ def check_out_of_bounds(board, row, col):
     rows, cols = board.shape
     return row < 0 or row > rows - 1 or col < 0 or col > cols - 1
 
-#returns a tuple containing empty board, whether game is ongoing, and rewards
-def init_game(rows=6, cols=7):
-    board = np.zeros((rows, cols)).astype(int)
+#returns a tuple containing board, whether game is ongoing, and rewards
+def init_game(input_board=None, rows=6, cols=7):
+    if input_board == None:
+        board = np.zeros((rows, cols)).astype(int)
+    else:
+        board = np.copy(input_board)
     return (board, True, rewards['ongoing'])
 
 #returns a tuple containing the resulting board, whether game is in ongoing, and reward
