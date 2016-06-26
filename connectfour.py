@@ -82,7 +82,7 @@ def check_out_of_bounds(board, row, col):
 
 #returns a tuple containing empty board, whether game is ongoing, and rewards
 def init_game(rows=6, cols=7):
-    board = np.zeros((rows, cols))
+    board = np.zeros((rows, cols)).astype(int)
     return (board, True, rewards['ongoing'])
 
 #returns a tuple containing the resulting board, whether game is in ongoing, and reward
@@ -128,28 +128,6 @@ def make_move(board, col, player_one_turn=True):
 
 #         print(board)
 #         player_one = not player_one
-
-# def total_consecutive_threes(board, player):
-#     total_threes = 0
-#     total_threes += sum([total_consecutive_threes_helper(row, player) for row in board])
-#     return total_threes
-
-# #return number of 3 consecutive items in a list
-# def total_consecutive_threes_helper(li, player):
-#     total_threes = 0
-
-#     #counter used to track number of consecutive pieces
-#     counter = 0
-#     for val in li:
-#         if val == player:
-#             counter += 1
-#         else:
-#             counter = 0
-
-#         if counter >= 3:
-#             total_threes += 1
-
-#     return total_threes
 
 if __name__ == '__main__':
     board, _, _ = init_game()
