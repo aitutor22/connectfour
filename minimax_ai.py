@@ -2,7 +2,7 @@ import time
 
 from connectfour import *
 
-max_depth = 5
+max_depth = 6
 
 hash_table = {}
 
@@ -59,6 +59,7 @@ def minimax(board, player_one_turn=True):
 		return 3
 	return minimax_helper(board, player_one_turn, -100000, 100000)
 
+#http://aima.cs.berkeley.edu/python/games.html
 def minimax_helper(board, max_player, alpha, beta, status='ongoing', depth=0):
 	previous_player = not max_player
 	best_val = -100000 if max_player else 100000
