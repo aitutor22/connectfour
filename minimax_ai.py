@@ -57,10 +57,11 @@ def minimax(board, player_one_turn=True):
 	#opening move when board is empty (place in center)
 	if len(np.where(board == 0)[0]) == 6 * 7:
 		return 3
-	return minimax_helper(board, player_one_turn)
+	return minimax_helper(board, player_one_turn, -100000, 100000)
 
-def minimax_helper(board, player_one_turn, status='ongoing', depth=0):
-	previous_player = not player_one_turn
+def minimax_helper(board, max_player, alpha, beta, status='ongoing', depth=0):
+	previous_player = not max_player
+	best_val = -100000 if max_player else 100000
 
 	#see if value is already stored
 	hashed_board = board.tostring()
@@ -75,34 +76,39 @@ def minimax_helper(board, player_one_turn, status='ongoing', depth=0):
 	elif depth == max_depth:
 		return evaluate(board)
 
-	depth += 1
-	scores = []
 	moves = get_available_moves(board)
 
-	next_turn = not player_one_turn
 	for move in moves:
 		possible_board = init_game(board)[0]
-		possible_board, status = make_move(possible_board, move, player_one_turn)
-		scores.append(minimax_helper(possible_board, next_turn, status, depth))
+		possible_board, status = make_move(possible_board, move, max_player)
+		score = minimax_helper(possible_board, (not max_player), alpha, beta, status, depth + 1)
 
-	if player_one_turn:
-		if depth == 1:	
-			print(moves)
-			print(scores)
-			return moves[np.argmax(scores)]
+		#for max_player
+		if max_player and score > best_val:
+			best_val = score
+			best_move = move
 
-		#store value in hash table
-		hash_table[board.tostring()] = max(scores)
-		return max(scores)
+			if best_val >= beta:
+				break
+
+			alpha = max(alpha, score)
+
+		#for min player
+		elif (not max_player) and score < best_val:
+			best_val = score
+			best_move = move
+
+			if best_val <= alpha:
+				break
+			beta = min(beta, score)
+
+	#return best move if at root node, else return the best value
+	if depth == 0:	
+		return best_move
 	else:
-		if depth == 1:
-			print(moves)
-			print(scores)
-			return moves[np.argmin(scores)]
-
-		#store value in hash table	
-		hash_table[board.tostring()] = min(scores)			
-		return min(scores)
+		#store value in hash table
+		hash_table[board.tostring()] = best_val
+		return best_val
 
 if __name__ == '__main__':
 	# s = convert(board)
