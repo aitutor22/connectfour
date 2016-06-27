@@ -4,13 +4,15 @@ Created on Sun Jun 26 16:11:04 2016
 
 @author: shengquan
 """
-
+# import theano.sandbox.cuda
+# theano.sandbox.cuda.use('gpu0')
 from keras.models import Sequential
 from keras.layers.core import Activation, Dense, Dropout
 from keras.layers.noise import GaussianNoise
 from keras.optimizers import SGD, Adam, Adamax
 from keras.callbacks import EarlyStopping
 
+import time
 import numpy as np
 #import random
 
@@ -88,6 +90,8 @@ def train_dnn_player():
         if epsilon > 0.1:
             epsilon -= (1 / epochs)
 
+        print(state)
+
 
 def human_make_move(board):
     #makes move and return the new state
@@ -115,4 +119,6 @@ def reshape_board(board):
     return np.reshape(new_board, (1,126))
     
 #--------------
+start_time = time.time()
 train_dnn_player()
+print('Time: {:.2f}s'.format(time.time() - start_time))
