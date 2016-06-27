@@ -60,7 +60,7 @@ def minimax(board, player_one_turn=True):
 	return minimax_helper(board, player_one_turn)
 
 def minimax_helper(board, player_one_turn, status='ongoing', depth=0):
-	player_mark = 1 if player_one_turn else -1
+	previous_player = not player_one_turn
 
 	#see if value is already stored
 	hashed_board = board.tostring()
@@ -69,7 +69,9 @@ def minimax_helper(board, player_one_turn, status='ongoing', depth=0):
 
 	#game has ended
 	elif status != 'ongoing':
-		return get_reward(status)
+		#if previous_player is player 1 (max) and he won, then reward is positive
+		#if previous_player is player 2 (min) and he won, then reward is negative
+		return get_reward(status) * (1 if previous_player else -1)
 	elif depth == max_depth:
 		return evaluate(board)
 
@@ -85,6 +87,8 @@ def minimax_helper(board, player_one_turn, status='ongoing', depth=0):
 
 	if player_one_turn:
 		if depth == 1:	
+			print(moves)
+			print(scores)
 			return moves[np.argmax(scores)]
 
 		#store value in hash table
@@ -92,6 +96,8 @@ def minimax_helper(board, player_one_turn, status='ongoing', depth=0):
 		return max(scores)
 	else:
 		if depth == 1:
+			print(moves)
+			print(scores)
 			return moves[np.argmin(scores)]
 
 		#store value in hash table	
@@ -126,11 +132,13 @@ if __name__ == '__main__':
 
 	b, status = init_game()
 	player_one_turn = True
+	total_time = 0
 	while status == 'ongoing':
 		if player_one_turn:
 			start_time = time.time()
 			move = minimax(b, player_one_turn)
 			print('Time taken: {:.2f}s'.format(time.time() - start_time))
+			total_time += time.time() - start_time
 			print('AI Move: {}'.format(move))
 			b, status = make_move(b, move, player_one_turn)
 		else:
@@ -140,3 +148,5 @@ if __name__ == '__main__':
 		print(b)
 		print('\n*******NEXT PLAYER*******\n')
 		player_one_turn = not player_one_turn
+
+	print('Time: {}'.format(total_time))
