@@ -4,6 +4,8 @@ from connectfour import *
 
 max_depth = 5
 
+hash_table = {}
+
 #evaluation function
 #+ if it favours player 1, - if it favours player 2
 def evaluate(board):
@@ -52,14 +54,22 @@ def total_consecutive_threes_helper(li, player_mark):
 	return total_threes
 
 def minimax(board, player_one_turn=True):
-	return minimax_helper(board, True, 0, player_one_turn)
+	#opening move when board is empty (place in center)
+	if len(np.where(board == 0)[0]) == 6 * 7:
+		return 3
+	return minimax_helper(board, player_one_turn)
 
-def minimax_helper(board, ongoing=True, reward=0, player_one_turn=True, depth=0):
+def minimax_helper(board, player_one_turn, status='ongoing', depth=0):
 	player_mark = 1 if player_one_turn else -1
 
-	#will return the absolute value
-	if not ongoing:
-		return reward
+	#see if value is already stored
+	hashed_board = board.tostring()
+	if depth > 0 and hashed_board in hash_table:
+		return hash_table[hashed_board]
+
+	#game has ended
+	elif status != 'ongoing':
+		return get_reward(status)
 	elif depth == max_depth:
 		return evaluate(board)
 
@@ -70,20 +80,29 @@ def minimax_helper(board, ongoing=True, reward=0, player_one_turn=True, depth=0)
 	next_turn = not player_one_turn
 	for move in moves:
 		possible_board = init_game(board)[0]
-		possible_board, ongoing, reward = make_move(possible_board, move, player_one_turn)
-		scores.append(minimax_helper(possible_board, ongoing, reward, next_turn, depth))
+		possible_board, status = make_move(possible_board, move, player_one_turn)
+		scores.append(minimax_helper(possible_board, next_turn, status, depth))
 
 	if player_one_turn:
 		if depth == 1:	
 			return moves[np.argmax(scores)]
+
+		#store value in hash table
+		hash_table[board.tostring()] = max(scores)
 		return max(scores)
 	else:
 		if depth == 1:
-			return moves[np.argmin(scores)]		
+			return moves[np.argmin(scores)]
+
+		#store value in hash table	
+		hash_table[board.tostring()] = min(scores)			
 		return min(scores)
 
 if __name__ == '__main__':
-	# board, _, _ = init_game()
+	# s = convert(board)
+	# print(s)
+	# print('***')
+	# print(convert(s, False))
 
 	# board, _, _ = make_move(board, 0, False)
 	# board, _, _ = make_move(board, 1, False)
@@ -103,30 +122,20 @@ if __name__ == '__main__':
 	# start_time = time.time()
 	# minimax(board, False)
 	# print(time.time() - start_time)
-
-	# board, _, _ = make_move(board, 3, True)
-	# board, _, _ = make_move(board, 4, True)
-	# board, _, _ = make_move(board, 4, True)
-	# board, _, _ = make_move(board, 5, True)
-	# board, _, _ = make_move(board, 5, False)
-	# board, _, _ = make_move(board, 5, True)
-	# print(total_consecutive_threes(board))
 	# print(board)
-	# board, _, _ = make_move(board, 1, False)
-	# state = make_move(board, 0,True)    
-	# print(state)
 
-	b, ongoing, reward = init_game()
+	b, status = init_game()
 	player_one_turn = True
-	while ongoing:
+	while status == 'ongoing':
 		if player_one_turn:
 			start_time = time.time()
 			move = minimax(b, player_one_turn)
-			print(time.time() - start_time)
-			b, ongoing, reward = make_move(b, move, player_one_turn)
+			print('Time taken: {:.2f}s'.format(time.time() - start_time))
+			print('AI Move: {}'.format(move))
+			b, status = make_move(b, move, player_one_turn)
 		else:
 			user_move = int(input('plese make a move\n'))
-			b, ongoing, reward = make_move(b, user_move, player_one_turn)
+			b, status = make_move(b, user_move, player_one_turn)
 
 		print(b)
 		print('\n*******NEXT PLAYER*******\n')
