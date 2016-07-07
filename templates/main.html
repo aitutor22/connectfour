@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% block body %}
+	<div class="container">
+		<div class="row">
+			{% for col in range(7) %}
+				<div id="arrow-{{col}}" class="col-md-1 top">
+					<a href="#">
+						<img src="{{ url_for('static', filename='arrow.jpg') }}">
+					</a>
+				</div>
+			{% endfor %}
+		</div>	
+		{% for row in range(6) %}
+			<div class="row">
+				{% for col in range(7) %}
+					<div id="{{row}}-{{col}}" class="col-md-1 grid"></div>
+				{% endfor %}
+			</div>
+		{% endfor %}
+	</div>	
+
+
+	<script src='{{ url_for('static', filename='jquery-3.0.0.min.js') }}'></script>	
+	<script src='{{ url_for('static', filename='main.js') }}'></script>
+{% endblock %}

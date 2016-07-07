@@ -2,7 +2,7 @@ import time
 
 from connectfour import *
 
-max_depth = 6
+max_depth = 1
 
 hash_table = {}
 
@@ -63,9 +63,11 @@ def minimax(board, player_one_turn=True):
 def minimax_helper(board, max_player, alpha, beta, status='ongoing', depth=0):
 	previous_player = not max_player
 	best_val = -100000 if max_player else 100000
+	best_move = None
+	scores = []
 
 	#see if value is already stored
-	hashed_board = board.tostring()
+	hashed_board = board.tostring() + '_{}'.format(depth)
 	if depth > 0 and hashed_board in hash_table:
 		return hash_table[hashed_board]
 
@@ -73,7 +75,8 @@ def minimax_helper(board, max_player, alpha, beta, status='ongoing', depth=0):
 	elif status != 'ongoing':
 		#if previous_player is player 1 (max) and he won, then reward is positive
 		#if previous_player is player 2 (min) and he won, then reward is negative
-		return get_reward(status) * (1 if previous_player else -1)
+		#we set a small cost to depth -> we try to incentivise shorter moves
+		return get_reward(status) * (1 if previous_player else -1) - depth * 0.05 * (1 if previous_player else -1)
 	elif depth == max_depth:
 		return evaluate(board)
 
@@ -83,6 +86,9 @@ def minimax_helper(board, max_player, alpha, beta, status='ongoing', depth=0):
 		possible_board = init_game(board)[0]
 		possible_board, status = make_move(possible_board, move, max_player)
 		score = minimax_helper(possible_board, (not max_player), alpha, beta, status, depth + 1)
+
+		if (not max_player) and depth == 0:
+			print(move, score)
 
 		#for max_player
 		if max_player and score > best_val:
@@ -104,39 +110,15 @@ def minimax_helper(board, max_player, alpha, beta, status='ongoing', depth=0):
 			beta = min(beta, score)
 
 	#return best move if at root node, else return the best value
-	if depth == 0:	
+	if depth == 0:
+		print(scores)
 		return best_move
 	else:
 		#store value in hash table
-		hash_table[board.tostring()] = best_val
+		hash_table[board.tostring() + '_{}'.format(depth)] = best_val
 		return best_val
 
 if __name__ == '__main__':
-	# s = convert(board)
-	# print(s)
-	# print('***')
-	# print(convert(s, False))
-
-	# board, _, _ = make_move(board, 0, False)
-	# board, _, _ = make_move(board, 1, False)
-	# # board, _, _ = make_move(board, 0, True)
-	# board, _, _ = make_move(board, 0, False)
-	# board, _, _ = make_move(board, 0, True)
-	# board, _, _ = make_move(board, 0, True)
-	# board, _, _ = make_move(board, 0, True)
-	# board, _, _ = make_move(board, 0, False)
-	# # board, _, _ = make_move(board, 1, False)
-	# board, ongoing, reward = make_move(board, 0, False)
-	# board, ongoing, reward = make_move(board, 0, False)
-	# board, ongoing, reward = make_move(board, 0, False)
-
-	# print(board)
-	# print(total_consecutive_threes(board, True))
-	# start_time = time.time()
-	# minimax(board, False)
-	# print(time.time() - start_time)
-	# print(board)
-
 	b, status = init_game()
 	player_one_turn = True
 	total_time = 0

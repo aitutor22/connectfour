@@ -108,5 +108,7 @@ if __name__ == '__main__':
     state = make_move(state[0], 0, False)
     state = make_move(state[0], 0, False)
     state = make_move(state[0], 0, False)
+    print(state)
+    state = make_move(state[0], 0, False)
  
     print(state)

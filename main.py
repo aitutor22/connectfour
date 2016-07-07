@@ -11,7 +11,7 @@ from keras.layers.core import Activation, Dense, Dropout
 from keras.layers.noise import GaussianNoise
 from keras.optimizers import SGD, Adam, Adamax
 from keras.callbacks import EarlyStopping
-
+import random
 import time
 import numpy as np
 #import random
@@ -24,9 +24,10 @@ import minimax_ai as mini_ai
 model = Sequential()
     
 layers = [
-    Dense(256, init='lecun_uniform', input_shape=(42*3,)), Activation('relu'), Dropout(0.5),
-    Dense(200, init='lecun_uniform'), Activation('relu'), Dropout(0.5),
-    Dense(100, init='lecun_uniform'), Activation('relu'), Dropout(0.5),
+    Dense(126, init='lecun_uniform', input_shape=(42*3,)), Activation('relu'), Dropout(0.5),
+    Dense(126, init='lecun_uniform'), Activation('relu'), Dropout(0.5),
+    Dense(90, init='lecun_uniform'), Activation('relu'), Dropout(0.5),
+    Dense(60, init='lecun_uniform'), Activation('relu'), Dropout(0.5),
     Dense(7, init='lecun_uniform'), Activation('linear')
 ]
     
@@ -38,9 +39,13 @@ model.compile(loss='mse', optimizer='rmsprop')
 def train_dnn_player():    
     
     #start reinforcement learning
-    epochs = 15 #no of rounds
+    epochs = 10000 #no of rounds
     gamma = 0.9 #discount factor
     epsilon = 1 #exploitation vs exploration
+    buffer = 80
+    replay = []
+    batchSize = 40
+    h = 0
     
     for i in range(epochs):        
         #start a new game        
@@ -63,30 +68,65 @@ def train_dnn_player():
             #get the reward for the new state
             reward = cf.get_reward(new_state[1])
             
-            #let the trainer AI make the move
-            # state_after_opponent_move = constant_AI_make_move(new_state[0])
-            state_after_opponent_move = cf.make_move(new_state[0], mini_ai.minimax(new_state[0], False), False)
-            #human_make_move(new_state[0])
-            
-            #get the q-function after the move and get the reward for the best move thereafter
-            newQ = model.predict(reshape_board(state_after_opponent_move[0]), batch_size=1)
-            maxQ = np.max(newQ)
-            y = np.zeros((1,7))
-            y[:] = qval[:]
-            
-            if new_state[1] == 'ongoing': #if not a winning move, have to add a discounted maxQ
-                update = (reward + gamma * maxQ)
-            else: #if won then just add reward, because no further maxQ
+            #let minimax play
+            if new_state[1] =='ongoing':
+                new_state = cf.make_move(new_state[0], mini_ai.minimax(new_state[0], False), False)
+                newQ = model.predict(reshape_board(new_state[0]), batch_size=1)
+                maxQ = np.max(newQ)
+                update = (reward + (gamma * maxQ))
+            else:
                 update = reward
             
-            y[0][action] = update
             
-            #update the model
-            model.fit(reshape_board(state[0]), y, batch_size=1, nb_epoch=1, verbose=1)
             
-            #update the state
-            state = state_after_opponent_move
-        
+            #experience replay; basically we are going to create a list of replays for the NN to refer to everytime it's called
+            if (len(replay)<buffer):
+                replay.append((state, action, update, new_state))
+            else: #buffer is full, overwrite old values
+                if (h < (buffer-1)):
+                    h += 1
+                else:
+                    h = 0
+                replay[h] = (state, action, update, new_state)
+                
+                #randomly sample our experience replay memory
+                minibatch = random.sample(replay, batchSize)
+                X_train = []
+                y_train = []
+                
+                for memory in minibatch:
+                    #get max_Q(S', a)
+                    old_state, action, update, new_state = memory
+                    old_qval = model.predict(reshape_board(old_state[0]), batch_size=1)
+                    
+                    """
+                    newQ = model.predict(reshape_board(new_state[0]), batch_size=1)
+                    maxQ = np.max(newQ)
+                    y = np.zeros((1,7))
+                    y[:] = old_qval[:]
+                    if new_state[1] =='ongoing':
+                        new_state = cf.make_move(new_state[0], mini_ai.minimax(new_state[0], False), False)
+                        #newQ = model.predict(reshape_board(new_state[0]), batch_size=1)                        
+                        update = (reward + (gamma * maxQ))
+                    else:
+                        update = reward
+                        
+                    y[0][action] = update
+                    """
+                    
+                    y = np.zeros((1,7))
+                    y[:] = old_qval[:]
+                    y[0][action] = update
+                    
+                    X_train.append( reshape_board(old_state[0]).reshape(126) )
+                    y_train.append( y.reshape(7) )
+                   
+                X_train = np.array(X_train)
+                y_train = np.array(y_train)
+                model.fit(X_train, y_train, batch_size=batchSize, verbose=1)
+            
+            state = new_state
+                
         if epsilon > 0.1:
             epsilon -= (1 / epochs)
 

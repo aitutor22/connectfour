@@ -1,0 +1,35 @@
+.container {
+	margin: 20px auto;
+}
+
+.red {
+	color: red;
+}
+
+.top {
+	height: 50px;
+}
+
+.top img {
+	margin-top: -10px;
+}
+
+.grid {
+	height: 100px;
+	border-color: black;
+	border-style: solid;
+	border-width: 1px 0 0 1px;
+	text-align: center;
+    font-size: 60px;	
+}
+
+.grid:last-child {
+	border-color: black;
+	border-style: solid;
+	border-width: 1px 1px 0px 1px;
+}
+
+.row:last-child .grid {
+	border-color: black;
+	border-bottom-width: 1px;
+}
